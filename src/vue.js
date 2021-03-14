@@ -14,10 +14,14 @@ class Vue{
     this._proxy(this.$data)
     // 响应式处理
     new Observe(this.$data)
+    // 执行编译
+    new Compiler(this.$el, this)
   }
   _proxy(data) {
     Object.keys(data).forEach(key => {
       Object.defineProperty(this, key, {
+        enumerable: true,
+        configurable: true,
         get() {
           return data[key]
         },

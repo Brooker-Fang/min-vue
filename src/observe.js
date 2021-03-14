@@ -8,7 +8,8 @@ class Observe{
   constructor(data) {
     this.walk(data)
   }
-  walk = (data) => {
+  walk(data) {
+    console.log('data===', data)
     if (!data || typeof data !== 'object') {
       return
     }
@@ -17,6 +18,7 @@ class Observe{
     })
   }
   defineReactive(obj, key, val) {
+    const self = this
     // 如果值是一个对象，递归处理val里的属性
     this.walk(val)
     Object.defineProperty(obj, key, {
@@ -26,8 +28,8 @@ class Observe{
         return val
       },
       set(v) {
-        if(v !== obj[key]){
-          this.walk(data)
+        if(v !== val){
+          self.walk(data)
           val = v
         }
       }

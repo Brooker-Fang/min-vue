@@ -19,6 +19,7 @@
       v-on:<button @click="changeCount">v-on</button>
     </div>
   </div>
+  <script src="./src/compiler.js"></script>
   <script src="./src/observe.js"></script>
   <script src="./src/vue.js"></script>
   <script>
@@ -27,7 +28,10 @@
       data() {
         return {
           count: 1,
-          inputVal: ''
+          inputVal: '',
+          obj: {
+            name: 'fhh'
+          }
         }
       },
       methods: {
