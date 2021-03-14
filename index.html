@@ -7,6 +7,36 @@
   <title>Document</title>
 </head>
 <body>
-  
+  <div id="app">
+    <div>
+      v-text: <span v-text="count"></span>
+      {{ count }}
+    </div>
+    <div>
+      v-model: <input v-model="inputVal"/>
+    </div>
+    <div>
+      v-on:<button @click="changeCount">v-on</button>
+    </div>
+  </div>
+  <script src="./src/observe.js"></script>
+  <script src="./src/vue.js"></script>
+  <script>
+    let vm = new Vue({
+      el: 'app',
+      data() {
+        return {
+          count: 1,
+          inputVal: ''
+        }
+      },
+      methods: {
+        changeCount() {
+          this.count++
+        }
+      }
+    })
+    console.log(vm)
+  </script>
 </body>
 </html>
