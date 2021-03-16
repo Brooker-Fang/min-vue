@@ -10,7 +10,10 @@
   <div id="app">
     <div>
       v-text: <span v-text="count"></span>
-      {{ count }}
+      <div>count: {{ count }}</div>
+    </div>
+    <div>
+      v-html<span v-html="vHtml"></span>
     </div>
     <div>
       v-model: <input v-model="inputVal"/>
@@ -19,19 +22,22 @@
       v-on:<button @click="changeCount">v-on</button>
     </div>
   </div>
+  <script src="./src/dep.js"></script>
+  <script src="./src/watcher.js"></script>
   <script src="./src/compiler.js"></script>
   <script src="./src/observe.js"></script>
   <script src="./src/vue.js"></script>
   <script>
     let vm = new Vue({
-      el: 'app',
+      el: '#app',
       data() {
         return {
           count: 1,
-          inputVal: '',
+          inputVal: 'input',
           obj: {
             name: 'fhh'
-          }
+          },
+          vHtml: '<span style="color: red">vHtml</span>'
         }
       },
       methods: {

@@ -9,7 +9,6 @@ class Observe{
     this.walk(data)
   }
   walk(data) {
-    console.log('data===', data)
     if (!data || typeof data !== 'object') {
       return
     }
@@ -21,16 +20,23 @@ class Observe{
     const self = this
     // 如果值是一个对象，递归处理val里的属性
     this.walk(val)
+    // 为每个属性 创建dep，收集依赖
+    const dep = new Dep()
     Object.defineProperty(obj, key, {
       enumerable: true,
       configurable: true,
       get() {
+        if (Dep.target) {
+          dep.collectDep(Dep.target)
+        }
         return val
       },
       set(v) {
         if(v !== val){
-          self.walk(data)
+          self.walk(v)
           val = v
+          // 状态改变  发送通知
+          dep.notify()
         }
       }
     })
