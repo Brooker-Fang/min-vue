@@ -13,13 +13,14 @@
       <div>count: {{ count }}</div>
     </div>
     <div>
-      v-html<span v-html="vHtml"></span>
+      v-html: <span v-html="vHtml"></span>
     </div>
     <div>
       v-model: <input v-model="inputVal"/>
     </div>
     <div>
-      v-on:<button @click="changeCount">v-on</button>
+      v-on:<button v-on:click="changeCount">v-on</button>
+      <button @click="changeCount">@click</button>
     </div>
   </div>
   <script src="./src/dep.js"></script>

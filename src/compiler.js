@@ -57,13 +57,30 @@ class Compiler{
       if(this.isDirective(attrName)) {
         // 截取指令名称 text、model、html
         const dir = attrName.slice(2)
+        // 是否v-on
+        if(this.isOnDirective(attrName)) {
+          // v-on:click 取出事件名 click
+          const eventName = attrName.split(':')[1]
+          this.onEventListener(node, eventName, key)
+          return
+        }
         const methodUpdater = dir + 'Updater'
         // 执行对应的更新函数，
         this[methodUpdater] && this[methodUpdater](node, this.$vm[key], key)
         new Watcher(this.$vm, key, (val, key) => {
           this[methodUpdater](node, val, key)
         })
+      } else if (this.isOnDirective(attrName)) {
+        // 这里只处理 @click="method"的情况，不包括传参情况
+        const eventName = attrName.split('@')[1]
+        const methodName = node.getAttribute(attrName)
+        this.onEventListener(node, eventName, methodName)
       }
+    })
+  }
+  onEventListener(node, eventName, methodName) {
+    node.addEventListener(eventName, (e) => {
+      this.$vm.$options.methods[methodName] && this.$vm.$options.methods[methodName].call(this.$vm)
     })
   }
   // 处理v-text
@@ -85,6 +102,10 @@ class Compiler{
   // 判断是否是指令
   isDirective(attrName) {
     return attrName.startsWith('v-')
+  }
+  // 判断是否是事件指令 @
+  isOnDirective(attrName) {
+    return attrName.startsWith('v-on') || attrName.startsWith('@')
   }
   // 判断是否是文本节点 且 是差值表达式
   isTextNode(node) {
