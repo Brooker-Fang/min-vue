@@ -1,7 +1,7 @@
 /* 
  + 保存传入的配置选项，el、data等
- + 对data里的数据代理到Vue实例上
- + 执行observe，对data里的数据做响应式处理
+ + 对data里的数据代理到Vue实例上，代理后才能使用this.[key]的形式访问
+ + 执行Observer，对data里的数据做响应式处理
  + 执行编译compiler，解析模板指令、差值表达式、
 */
 class Vue{
@@ -13,7 +13,7 @@ class Vue{
     // 将data里的数据代理到实例上
     this._proxy(this.$data)
     // 响应式处理
-    new Observe(this.$data)
+    new Observer(this.$data)
     // 执行编译
     new Compiler(this.$el, this)
   }

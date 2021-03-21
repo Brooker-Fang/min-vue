@@ -8,7 +8,7 @@ class Dep{
     this.deps = []
   }
   // 收集依赖
-  collectDep(dep) {
+  addSub(dep) {
     if (dep && dep.update) {
       this.deps.push(dep)
     }

@@ -4,9 +4,24 @@
   + 重写属性的get，但属性被读取时，创建一个watcher观察者
   + 重写属性的set，当属性改变时
 */
-class Observe{
+const arrayMethods = [
+  'push',
+  'pop',
+  'shift',
+  'unshift',
+  'splice',
+  'sort',
+  'reverse'
+]
+class Observer{
   constructor(data) {
+    // 用于收集对象本身的依赖,即 对对象本身做响应式
+    this.dep = new Dep()
+    // 存储Observer对象
+    data.__ob__ = this
+    // 遍历对象属性 做响应式
     this.walk(data)
+    
   }
   walk(data) {
     if (!data || typeof data !== 'object') {
@@ -27,7 +42,7 @@ class Observe{
       configurable: true,
       get() {
         if (Dep.target) {
-          dep.collectDep(Dep.target)
+          dep.addSub(Dep.target)
         }
         return val
       },

@@ -11,6 +11,7 @@
     <div>
       v-text: <span v-text="count"></span>
       <div>count: {{ count }}</div>
+      <div>obj: {{ obj }}</div>
     </div>
     <div>
       v-html: <span v-html="vHtml"></span>
@@ -21,6 +22,7 @@
     <div>
       v-on:<button v-on:click="changeCount">v-on</button>
       <button @click="changeCount">@click</button>
+      <button @click="changeObject">changeObject</button>
     </div>
   </div>
   <script src="./src/dep.js"></script>
@@ -44,6 +46,11 @@
       methods: {
         changeCount() {
           this.count++
+        },
+        changeObject() {
+          this.obj = {
+            name: this.obj.name + 'h'
+          }
         }
       }
     })

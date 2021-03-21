@@ -41,9 +41,11 @@ class Compiler{
     const text = node.textContent
     if (reg.test(text)) {
       const key = RegExp.$1.trim()
-      node.textContent = text.replace(reg, this.$vm[key])
+      console.log('value===', JSON.stringify(this.$vm[key]))
+      node.textContent = text.replace(reg, this.$vm[key] && typeof this.$vm[key]==='object' ? JSON.stringify(this.$vm[key]): this.$vm[key])
       new Watcher(this.$vm, key, val => {
-        node.textContent = text.replace(reg, val)
+        let value = val && typeof val ==='object' ? JSON.stringify(val): val
+        node.textContent = text.replace(reg, value)
       })
     }
   }
