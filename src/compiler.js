@@ -51,7 +51,6 @@ class Compiler{
   }
   // 编译元素节点
   compilerElement(node) {
-    console.log(node)
     Array.from(node.attributes).forEach(attr => {
       const attrName = attr.name 
       const key = attr.value
@@ -98,7 +97,7 @@ class Compiler{
     node.value = value
     node.addEventListener('input', (e) => {
       this.$vm[key] = e.target.value
-      console.log(`${key}===`, this.$vm[key])
+      console.log(`model change ===`, this.$vm[key])
     })
   }
   // 判断是否是指令

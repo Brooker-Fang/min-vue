@@ -6,7 +6,73 @@
 + 在对属性重新设值的时候，dep会同时触发所有观察者的更新函数
 
 ## 源码实现
-
+### Vue类实现
+1、 使用
+```js
+new Vue({
+      el: '#app',
+      data() {
+        return {
+          count: 1,
+          inputVal: 'input',
+          obj: {
+            name: 'fhh'
+          },
+          vHtml: '<span style="color: red">vHtml</span>'
+        }
+      },
+      methods: {
+        changeCount() {
+          this.count++
+        },
+        changeObject() {
+          this.obj = {
+            name: this.obj.name + 'h'
+          }
+        }
+      }
+    })
+```
+2、需要实现：
+ + 保存传入的配置选项，el、data等
+ + 对data里的数据代理到Vue实例上，代理后才能使用this.[key]的形式访问
+ + 执行Observer，对data里的数据做响应式处理
+ + 执行编译compiler，解析模板指令、差值表达式等
+```js
+class Vue{
+  constructor(options) {
+    // 保存配置选项
+    this.$options = options
+    this.$el = typeof options.el === 'string' ? document.querySelector(options.el) : options.el
+    this.$data = typeof options.data === 'function' ? options.data() : options.data
+    // 将data里的数据代理到实例上
+    this._proxy(this.$data)
+    // 响应式处理
+    new Observer(this.$data)
+    // 执行编译
+    new Compiler(this.$el, this)
+  }
+  // 代理属性
+  _proxy(data) {
+    Object.keys(data).forEach(key => {
+      Object.defineProperty(this, key, {
+        enumerable: true,
+        configurable: true,
+        get() {
+          return data[key]
+        },
+        set(v) {
+          if (v !== data[key]) {
+            data[key] = v
+          }
+        }
+      })
+    })
+  }
+}
+```
+### Observer响应式属性实现
+需实现：
 ## 关键点
 ### 观察者怎么与属性依赖收集建立关系
 ### 属性更新时，怎么让dom重新渲染

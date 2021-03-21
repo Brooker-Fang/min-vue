@@ -17,6 +17,7 @@ class Vue{
     // 执行编译
     new Compiler(this.$el, this)
   }
+  // 代理属性
   _proxy(data) {
     Object.keys(data).forEach(key => {
       Object.defineProperty(this, key, {
