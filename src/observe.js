@@ -7,24 +7,15 @@
     + get，当属性被读取时，将watcher观察者添加到当前属性的dep中。此时watcher会存于Dep类的静态属性target中
     + set，当属性改变时，通知当前属性的dep下的所有观察者，执行更新操作
 */
-const arrayMethods = [
-  'push',
-  'pop',
-  'shift',
-  'unshift',
-  'splice',
-  'sort',
-  'reverse'
-]
 class Observer{
   constructor(data) {
-    // 用于收集对象本身的依赖,即 对对象本身做响应式
-    this.dep = new Dep()
-    // 存储Observer对象
-    data.__ob__ = this
-    // 遍历对象属性 做响应式
-    this.walk(data)
-    
+    if (Array.isArray(data)) {
+      // 如果是数组 覆盖数组实例的原型
+      // ...TODO
+    } else { 
+      // 遍历对象属性 做响应式
+      this.walk(data)
+    }
   }
   walk(data) {
     if (!data || typeof data !== 'object') {
