@@ -1,9 +1,9 @@
-## Vue2的响应式实现流程
+## Vue的响应式实现流程
 + Vue初始化时，会把data里的所有数据通过Object.defineProperty进行数据劫持，即重写数据的get和set。所以只有初始化时的属性才有响应式，新增的属性得通过$set,才会进行响应式处理
-+ data里的每个属性，都会有属于自己的依赖收集的实例，new Dep。属性get时，进行收集观察者，属性set时，通知所有观察者执行更新函数
-+ 对数据做响应式处理后，执行编译。当编译到指令执行dom更新时，同时创建观察者，传入更新函数
-+ 观察者初始化时，通过触发属性的get，将观察者添加到相对应属性的 依赖收集里。
-+ 在对属性重新设值的时候，dep会同时触发所有观察者的更新函数
++ data里的每个属性，都会有属于自己的依赖收集的实例，new Dep。属性get时，进行依赖收集，属性set时，通知所有watcher执行更新函数
++ 对数据做响应式处理后，执行编译。当编译到指令执行dom更新时，同时创建watcher，传入更新函数
++ watcher初始化时，通过触发属性的get，将watcher添加到相对应属性的 依赖收集里。
++ 在对属性重新设值的时候，dep会同时触发所有watcher的更新函数
 
 ## 源码实现
 ### Vue类实现
@@ -16,7 +16,7 @@ new Vue({
           count: 1,
           inputVal: 'input',
           obj: {
-            name: 'fhh'
+            name: 'whh'
           },
           vHtml: '<span style="color: red">vHtml</span>'
         }
@@ -78,8 +78,8 @@ class Vue{
     + 如果是属性的值是数组，则需对此数组实例覆盖原有方法，并对数组里的每一项做响应式处理
   + 响应式处理：
     + 使用Object.defineProperty,对每个属性进行劫持，重写get、set
-    + get，当属性被读取时，将watcher观察者添加到当前属性的dep中。此时watcher会存于Dep类的静态属性target中
-    + set，当属性改变时，通知当前属性的dep下的所有观察者，执行更新操作
+    + get，当属性被读取时，将watcher添加到当前属性的dep中。此时watcher会存于Dep类的静态属性target中
+    + set，当属性改变时，通知当前属性的dep下的所有的watcher，执行更新操作
 ```js
 class Observer{
   constructor(data) {
@@ -128,8 +128,8 @@ class Observer{
 ```
 ### Dep类实现
 需实现：
-  + 用数组收集观察者
-  + 发送通知，执行观察者的更新函数
+  + 用数组收集watcher
+  + 发送通知，执行watcher的更新函数
 ```js
 class Dep{
   constructor() {
@@ -166,6 +166,7 @@ class Watcher{
     vm[key]
     Dep.target = null
   }
+  // 更新函数
   update() {
     this.updateFn.call(this.$vm, this.$vm[this.$key], this.$key)
   }
@@ -184,7 +185,7 @@ class Watcher{
       + v-on 取出事件类型和事件名，监听事件
     编译文本节点
       + 差值表达式 用正则获取差值表达式的 key，然后得到vue实例中data里key的值，替换文本节点 textContent = val
-  + 编译解析的指令或者表达式的同时，new Watcher创建观察者，传入更新函数。数据发生变化后，会通知所有watcher执行更新函数，即重新渲染相对应的dom更新
+  + 编译解析的指令或者表达式的同时，new Watcher创建watcher，传入更新函数。数据发生变化后，会通知所有watcher执行更新函数，即重新渲染相对应的dom更新
 ```js
 class Compiler{
   constructor(el, vm) {
@@ -289,13 +290,67 @@ class Compiler{
 }
 ```
 ## 关键点
-### 观察者怎么与属性依赖收集建立关系
+### watcher怎么与属性依赖收集建立关系
 + 在属性get的时候，会将Dep.target添加到当前属性的dep依赖收集里
 + 在实例化watcher时，会将Dep.target设置为当前实例，然后触发下属性的get，此时watcher即加入到属性的dep里，在把Dep.target设置为null
 ### 属性更新时，怎么让dom重新渲染
 + 实例化watcher时，同时传入更新函数
-+ 属性set的时候，会执行dep里所有的观察者的更新函数
++ 属性set的时候，会执行dep里所有的watcher的更新函数
 ### 数组怎么做响应式
 + 在对数据做响应式时，如果是数组实例，则覆盖当前数组实例的7个原型方法，有push、pop、shift、unshift、splice、sort、reverse，当执行这几个方法时，同时调用数组实例的__ob__.dep.notify,即执行notify操作。(在实例化Observe时，同时会将当前Observe实例保存到__ob__中，并且同时实例化一个dep，即可以通过__ob__.dep.notify执行更新操作)
-+ 处理数组时，还需对数组里的每一项做响应式处理。并且做数组添加时，如push、splice、unshift，也需要对添加的项做响应式处理
-+ 因为数组的响应式是通过覆盖原型方法实现的，没有实现检测数组的变动，所以通过修改数组的长度 和 通过索引修改数组的项. 如：this.arr.length = n, this.arr[0] = 1这两种形式(Object.defineProperty是可以检测到数组索引的变化的，但是由于尤大认为性能代价于用户体验收益不成正比，所以没有做)
++ 处理数组时，还需对数组里的每一项做响应式处理(主要是对对象和数组添加observer对象)。并且做数组添加时，如push、splice、unshift，也需要对添加的项做响应式处理(主要是对对象和数组添加observer对象)
++ 因为数组的响应式是通过覆盖原型方法实现的，没有实现检测数组的变动，所以通过修改数组的长度 和 通过索引修改数组的项. 如：this.arr.length = n, this.arr[0] = 1这两种形式(Object.defineProperty是可以检测到数组索引的变化的，但是由于性能代价于用户体验收益不成正比，所以没有做)
+### 源码中数组的响应式实现
+```js
+/* 
+  覆盖数组的原型方法
+*/
+const arrayProto = Array.prototype
+// 复制数组原型
+const arrayMethodsProto = Object.create(arrayProto)
+// 要覆盖的7个方法
+const methodsToPatch = [
+  'push',
+  'pop',
+  'shift',
+  'unshift',
+  'splice',
+  'sort',
+  'reverse'
+]
+function def (obj, key, val) {
+  Object.defineProperty(obj, key, {
+    value: val,
+    enumerable: true,
+    writable: true,
+    configurable: true
+  })
+}
+methodsToPatch.forEach(function (method) {
+  const original = arrayProto[method]
+  def(arrayMethodsProto, method, function mutator (...args) {
+    // 数组方法的默认行为
+    const result = original.apply(this, args)
+
+    // 获取数组属性的 dep
+    const ob = this.__ob__
+    // 插入操作：会导致新元素进入，需要做响应式处理
+    let inserted
+    switch (method) {
+      case 'push':
+      case 'unshift':
+        inserted = args
+        break
+      case 'splice':
+        inserted = args.slice(2)
+        break
+    }
+    // 
+    if (inserted) ob.observeArray(inserted)
+    // 通知更新
+    ob.dep.notify()
+    return result
+  })
+})
+
+```
